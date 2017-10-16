@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.AdminDao">
+	
+	<resultMap type="entity.Admin_im" id="admin_imMapper">
+		<id property="admin_id" column="admin_id"/>
+		<result property="admin_username" column="admin_username"/>
+		<result property="admin_password" column="admin_password"/>
+		<result property="admin_name" column="admin_name"/>
+		<result property="admin_phone" column="admin_phone"/>
+		<result property="admin_email" column="admin_email"/>
+		<association property="admin_action" javaType="entity.Admin_action">
+			<id property="admin_action_id" column="admin_action_id"/>
+			<result property="admin_action_name" column="admin_action_name"/>
+			<result property="admin_action_note" column="admin_action_note"/>
+		</association>
+	</resultMap>
+	
+	<!-- 后台登陆验证 -->
+	<select id="selectByNamePassword" parameterType="map" resultMap="admin_imMapper">
+		select * from admin_im where admin_username=#{username} and admin_password=#{password}
+	</select>
+	
+	<!-- 根据ID查admin -->
+	<select id="selectAdminById" parameterType="int" resultMap="admin_imMapper">
+		select * from admin_im where admin_id=#{admin_id}
+	</select>
+	
+	<!-- 根据姓名查询管理员 -->
+	<select id="selectByName" parameterType="String" resultMap="admin_imMapper">
+		select * from admin_im where admin_name like #{name}
+	</select>
+	
+	<!-- 查询全部管理员 -->
+	<select id="selectAllAdmin" resultMap="admin_imMapper">
+		select
+		 a.admin_id,a.admin_username,a.admin_password,a.admin_name,a.admin_phone,a.admin_email,b.admin_action_id,b.admin_action_name,b.admin_action_note 
+		 from 
+		 admin_im a,admin_action b 
+		 where 
+		 a.admin_action_id = b.admin_action_id
+	</select>
+	
+	<!-- 新增admin_im元素 -->
+	<insert id="insert" parameterType="entity.Admin_im">
+		insert into admin_im (
+			admin_username,
+			admin_password,
+			admin_name,
+			admin_phone,
+			admin_email,
+			admin_action_id
+		)values(
+			#{admin_username},
+			#{admin_password},
+			#{admin_name},
+			#{admin_phone},
+			#{admin_email},
+			#{admin_action.admin_action_id}
+		)
+	</insert>
+	
+	<!-- 更新操作 -->
+	<update id="update" parameterType="entity.Admin_im">
+		update admin_im set 
+			admin_username=#{admin_username},
+			admin_password=#{admin_password},
+			admin_name=#{admin_name},
+			admin_phone=#{admin_phone},
+			admin_email=#{admin_email},
+			admin_action_id=#{admin_action.admin_action_id}
+		 where admin_id=#{admin_id}
+	</update>
+	
+	<!-- 删除操作 -->
+	<delete id="delete" parameterType="int">
+		delete from admin_im where admin_id=#{admin_id}
+	</delete>
+	
+	
+	<!-- 查询所有管理权限 -->
+	<select id="selectAllAction"  resultType="admin_action">
+		select admin_action_id,admin_action_name,admin_action_note from admin_action
+	</select>
+	
+	<!-- 查询管理权限 -->
+	<select id="selectActionById" parameterType="int" resultType="admin_action">
+		select * from admin_action where admin_action_id=#{admin_action_id}
+	</select>
+	
+	<!-- 查询所有需要权限才能访问的uri -->
+	<select id="selectAllAuthority_url"  resultType="authority_url">
+		select * from authority_url
+	</select>
+	
+	<!-- 权限对应表 -->
+	<resultMap type="entity.Authority_admin" id="authority_admin">
+		<id property="authority_admin_id" column="authority_admin_id"/>
+		<result property="admin_action_id" column="admin_action_id"/>
+		<result property="authority_note" column="authority_note"/>
+		
+		<association property="authority_url" javaType="entity.Authority_url">
+			<id property="authority_url_id" column="authority_url_id"/>
+			<result property="authority_url" column="authority_url"/>
+			<result property="authority_note" column="authority_note"/>
+		</association>
+	</resultMap>
+	
+	<!-- 根据查询得到的action的id查找此id的所有对应表中的数据 --> 
+	<select id="selectAuthority_adminByAdmin_action_id" parameterType="int" resultMap="authority_admin">
+		select a.authority_admin_id,a.admin_action_id,a.authority_note,
+		 b.authority_url_id, b.authority_url 
+		from authority_admin a,authority_url b
+		where a.admin_action_id = #{authority_admin_id} 
+		and a.authority_url_id = b.authority_url_id
+	</select>
+	
+	<!-- 根据查询得到的多个  对应表的id 查找此id的对应uri --> 
+	<select id="selectAuthority_url" parameterType="int" resultType="authority_url">
+		select * from authority_url where authority_url_id = #{id}
+	</select>
+	
+	<!-- 增加图片 --> 
+	<insert id="insertImg" parameterType="entity.Img">
+		insert into img(
+			img_id,img_name,img_filename,
+			img_sizekb,img_time,img_type_id,img_fileup_id
+		) values(
+			#{img_id},#{img_name},#{img_filename},
+			#{img_sizekb},#{img_time},#{img_type_id},#{img_fileup_id}
+		)
+	</insert>
+	
+	<!-- 增加上传记录 --> 
+	<insert id="insertFileup" parameterType="entity.Img_fileup">
+		insert into img_fileup(
+			img_fileup_id,img_fileup_time,admin_id
+		) values(
+			#{img_fileup_id},#{img_fileup_time},#{admin_id}
+		)
+	</insert>
+	
+	<!-- 在上传图片前的进行查询选中的图片分类查询 -->
+	<select id="selectTypeByName" parameterType="String" resultType="img_type">
+		select * from img_type where img_type_name = #{img_type_name}
+	</select>
+	
+	<!-- 查询所有图片（11）分类 -->
+	<select id="selectAllImgType" resultType="img_type">
+		select * from img_type where img_type_level=11
+	</select>
+	
+	<!-- 增加下载记录 --> 
+	<insert id="insertFiledown" parameterType="entity.Img_filedown">
+		insert into img_filedown(
+			img_filedown_time,user_id,img_id
+		) values(
+			#{img_filedown_time},#{user_id},#{img_id}
+		)
+	</insert>
+	
+	<!-- 更改图片 --> 
+	<update id="updateImg" parameterType="entity.Img">
+		update img 
+		set 
+			img_name = #{img_name},
+			img_time = #{img_time},
+			img_type_id = #{img_type_id}
+		where
+			img_id=#{img_id}
+	</update>
+	
+	<!-- 分页：所有图片分页查询 --> 
+	<select id="selectAllImgFY" parameterType="map" resultType="img">
+		select * from img i, img_type t 
+		where i.img_type_id = t.img_type_id 
+		limit #{start},#{size}
+	</select>
+	
+	
+</mapper>

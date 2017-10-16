@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	
+	<typeAliases>
+		<typeAlias type="entity.Admin_im" alias="admin_im"/>
+		<typeAlias type="entity.Admin_action" alias="admin_action"/>
+		<typeAlias type="entity.Authority_url" alias="authority_url"/>
+		<typeAlias type="entity.Authority_admin" alias="authority_admin"/>
+		<typeAlias type="entity.Img" alias="img"/>
+		<typeAlias type="entity.Img_type" alias="img_type"/>
+		<typeAlias type="entity.Img_fileup" alias="img_fileup"/>
+		<typeAlias type="entity.Img_filedown" alias="img_filedown"/>
+	</typeAliases>
+	
+</configuration>
